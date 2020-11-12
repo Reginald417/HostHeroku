@@ -17,6 +17,14 @@ app.use(cors());
 /**
  * ========================== SETUP APP =========================
  */
+app.use(express.json())
+
+const error = {
+    QUEUE_EXIST: {
+        body: {error: 'Queue alreay exists',code: 'QUEUE_EXISTS'},
+        status: 422,
+    },
+}
 
 /**
  * JSON Body
@@ -38,9 +46,41 @@ app.use(cors());
  * Company: Create Queue
  */
 
+app.post('/company/queue', function (req, res) {
+
+    const queue_id = req.body.queue_id;
+    const company_id = req.body.company_id; 
+
+    database.createQueue(queue_id, company_id, function (err, result) {
+        if (!err) {
+            console.log(result + " row inserted.");
+            res.status(201).send("Created")
+        } else{
+            res.send(err.statusCode);
+        }
+    });
+    
+});
+
+
 /**
  * Company: Update Queue
  */
+
+app.put('/company/queue', function (req, res) {
+    
+    const queue_id = req.query.queue_id;   
+    const status = req.body.status;
+    
+    database.updateQueue(queue_id, status, function (err, result) {
+        if (!err) {
+            console.log(result+" row updated.");
+            res.send(result + ' record inserted');
+        } else{
+            res.send(err.statusCode);
+        }
+    });
+});
 
 /**
  * Company: Server Available
@@ -70,9 +110,24 @@ app.use(cors());
  * 404
  */
 
+app.use(function (req, res, next) {
+    throw {
+        body: {error: 'Not Found!'},
+        status: 404,
+    };
+});
+
 /**
  * Error Handler
  */
+
+app.use(function (err, req, res, next) {
+    const status = err.status || 500;
+    const body = err || {
+        error: 'Unexpected Error!',
+    };
+    res.status(status).send(body);
+});
 
 function tearDown() {
     // DO NOT DELETE
