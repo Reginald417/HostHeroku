@@ -2,8 +2,15 @@ const express = require('express'); // DO NOT DELETE
 const cors = require('cors');
 const morgan = require('morgan');
 const app = express(); // DO NOT DELETE
-
 const database = require('./database');
+const { Validator, ValidationError } = require('express-json-validator-middleware');
+const validator = new Validator({allErrors: true});
+const schema_createQueue = require('.//jsonSchemas/createQueue.json');
+const schema_updateQueue = require('.//jsonSchemas/updateQueue.json');
+const schema_updateQueueQuery = require('.//jsonSchemas/updateQueueQuery.json');
+const schema_arrivalRate = require('.//jsonSchemas/arrivalRate.json');
+const schema_joinQueue = require('.//jsonSchemas/joinQueue.json');
+const schema_serverAvailable = require('.//jsonSchemas/serverAvailable.json');
 
 app.use(morgan('dev'));
 app.use(cors());
@@ -17,14 +24,21 @@ app.use(cors());
 /**
  * ========================== SETUP APP =========================
  */
-app.use(express.json())
+app.use(express.json());
 
-const error = {
-    QUEUE_EXIST: {
-        body: {error: 'Queue alreay exists',code: 'QUEUE_EXISTS'},
-        status: 422,
+
+const errors = {
+    INVALID_JSON_BODY: {
+        message: 'Input is invalid',
+        status: 400,
+        code: 'INVALID_JSON_BODY',
     },
-}
+    INVALID_QUERY_STRING: {
+        message: 'Query is invalid', 
+        status: 400,
+        code: 'INVALID_QUERY_STRING',
+    }
+};
 
 /**
  * JSON Body
@@ -38,6 +52,19 @@ const error = {
  * Reset API
  */
 
+ 
+app.post('/reset',function (req, res, next) {
+
+    database.resetTables()
+        .then(function(result){
+            res.status(200).send();
+        })  
+        .catch(function(error){
+            next(error);
+        });
+});
+
+
 /**
  * ========================== COMPANY =========================
  */
@@ -46,39 +73,34 @@ const error = {
  * Company: Create Queue
  */
 
-app.post('/company/queue', function (req, res) {
-
+app.post('/company/queue',validator.validate({body: schema_createQueue}) ,function (req, res, next) {
+    
     const queue_id = req.body.queue_id;
     const company_id = req.body.company_id; 
 
-    database.createQueue(queue_id, company_id, function (err, result) {
-        if (!err) {
-            console.log(result + " row inserted.");
-            res.status(201).send("Created")
-        } else{
-            res.send(err.statusCode);
-        }
-    });
-    
+    database.createQueue(queue_id, company_id)
+        .then(function(result){
+            res.status(201).send();
+        })  
+        .catch(function(error){
+            next(error);
+        });
 });
-
 
 /**
  * Company: Update Queue
  */
+app.put('/company/queue',validator.validate({body: schema_updateQueue,query: schema_updateQueueQuery}),function (req, res, next) {
 
-app.put('/company/queue', function (req, res) {
-    
     const queue_id = req.query.queue_id;   
     const status = req.body.status;
-    
-    database.updateQueue(queue_id, status, function (err, result) {
-        if (!err) {
-            console.log(result+" row updated.");
-            res.send(result + ' record inserted');
-        } else{
-            res.send(err.statusCode);
-        }
+
+    database.updateQueue(queue_id, status)
+    .then(function(){
+        res.status(200).send();
+    })   
+    .catch(function(error){
+        next(error);
     });
 });
 
@@ -86,9 +108,41 @@ app.put('/company/queue', function (req, res) {
  * Company: Server Available
  */
 
+app.put('/company/server',validator.validate({body: schema_serverAvailable}),function (req, res, next) {
+
+    const queue_id = req.body.queue_id;   
+
+    database.serverAvailable(queue_id)
+    .then(function(result){
+        res.status(200).send(result);
+    })   
+    .catch(function(error){
+        next(error);
+    });
+});
+
 /**
  * Company: Arrival Rate
  */
+
+app.get('/company/arrival_rate',validator.validate({query: schema_arrivalRate}),function (req, res, next) {
+
+    const queue_id = req.query.queue_id;
+    const from = req.query.from;
+    const duration = req.query.duration;   
+    if(parseInt(duration)>=1 && parseInt(duration)<=1440){
+        database.arrivalRate(queue_id, from, duration)
+        .then(function(result){
+            res.status(200).send(result);
+        })   
+        .catch(function(error){
+            next(error);
+        });
+    }
+    else {
+        next(errors.INVALID_QUERY_STRING)
+    }
+});
 
 /**
  * ========================== CUSTOMER =========================
@@ -97,6 +151,20 @@ app.put('/company/queue', function (req, res) {
 /**
  * Customer: Join Queue
  */
+
+app.post('/customer/queue',validator.validate({body: schema_joinQueue}),function (req, res, next) {
+    
+    const customer_id = req.body.customer_id; 
+    const queue_id = req.body.queue_id;
+
+    database.joinQueue(customer_id, queue_id)
+        .then(function(result){
+            res.status(201).send();
+        })  
+        .catch(function(error){
+            next(error);
+        });
+});
 
 /**
  * Customer: Check Queue
@@ -122,11 +190,23 @@ app.use(function (req, res, next) {
  */
 
 app.use(function (err, req, res, next) {
-    const status = err.status || 500;
-    const body = err || {
-        error: 'Unexpected Error!',
-    };
-    res.status(status).send(body);
+    if (err instanceof ValidationError) {
+        if (err.validationErrors.body != undefined){
+            console.log('Invalid JSON Body')
+            res.status(errors.INVALID_JSON_BODY.status).send(errors.INVALID_JSON_BODY);
+        }
+        else {
+            console.log('Invalid Query String')
+            res.status(errors.INVALID_QUERY_STRING.status).send(errors.INVALID_QUERY_STRING);
+        }
+    }
+    else {
+        const status = err.status || 500;
+        const error = err || {
+            error: 'Unexpected Error!',
+        };
+        res.status(status).send(error);
+    }
 });
 
 function tearDown() {

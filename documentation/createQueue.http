@@ -1,0 +1,70 @@
+@host = localhost:3000
+@path = /company/queue
+
+### Create Queue
+POST http://{{host}}{{path}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "company_id": 1234567890,
+    "queue_id": "QUEUE12345"
+}
+
+###
+<!-- 
+Test Scenario: Creating Queue
+
+Expected Outcome:
+console: 'Queue created successfully'
+success response: status: 201 
+-->
+
+
+
+### Create Duplicate Queue
+POST http://{{host}}{{path}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "company_id": 1234567890,
+    "queue_id": "QUEUE12345"
+}
+
+###
+<!--
+Testing Scenario: Creating Duplicate Queue
+
+Expected Outcome:
+console: 'Queue ID already exists'
+error response: 
+{
+  "message": "Queue ID already exists",
+  "status": 422,
+  "code": "QUEUE_EXISTS"
+}
+-->
+
+
+
+### Invalid JSON Body
+POST http://{{host}}{{path}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "company_id": 1234567890,
+    "queue_id": "QUEUE1234"
+}
+
+###
+<!--
+Testing Scenario: Creating Duplicate Queue
+
+Expected Outcome:
+console: 'Invalid JSON Body or Query'
+error response: 
+{
+  "message": "Input is invalid",
+  "status": 400,
+  "code": "INVALID_JSON_BODY"
+}
+-->

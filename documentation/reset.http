@@ -1,0 +1,13 @@
+@host = http://localhost:3000
+
+### Reset 
+POST {{host}}/reset HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Reset Tables
+
+Expected Outcome:
+console: 'Queue reset successfully'
+success response: status: 201 
+-->

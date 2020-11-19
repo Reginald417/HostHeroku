@@ -1,0 +1,68 @@
+### Arrival Rate 
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE10001
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+
+###
+<!-- 
+Test Scenario: Getting Arrival Rate
+
+Expected Outcome:
+console: 'Arrival Rate Done'
+success response: 
+[
+  {
+    "timestamp": 1605663900,
+    "count": "0"
+  }, 
+  .....
+  {
+    "timestamp": 1605663959,
+    "count": "0"
+  }
+]
+-->
+
+
+
+### Non-Existence Queue ID
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE10002
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+
+###
+<!-- 
+Test Scenario: Non-Existent Queue ID
+
+Expected Outcome:
+console: 'Queue ID non-existent'
+success response: 
+{
+    "message": "Queue ID provided is non existent",
+    "status": 404,
+    "code": "UNKNOWN_QUEUE"
+}
+-->
+
+
+
+### Invalid Query Parameters
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE1000
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+###
+<!-- 
+Test Scenario: Non-Existent Queue ID
+
+Expected Outcome:
+console: 'Invalid JSON Body or Query'
+success response: 
+{
+    "message": "Input is invalid",
+    "status": 400,
+    "code": "INVALID_JSON_BODY"
+}
+-->
