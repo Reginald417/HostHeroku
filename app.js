@@ -11,6 +11,8 @@ const schema_updateQueueQuery = require('.//jsonSchemas/updateQueueQuery.json');
 const schema_arrivalRate = require('.//jsonSchemas/arrivalRate.json');
 const schema_joinQueue = require('.//jsonSchemas/joinQueue.json');
 const schema_serverAvailable = require('.//jsonSchemas/serverAvailable.json');
+const schema_checkQueue = require('.//jsonSchemas/checkQueue.json');
+const { queue } = require('async');
 
 app.use(morgan('dev'));
 app.use(cors());
@@ -169,6 +171,25 @@ app.post('/customer/queue',validator.validate({body: schema_joinQueue}),function
 /**
  * Customer: Check Queue
  */
+
+app.get('/customer/queue',validator.validate({query: schema_checkQueue}),function(req,res,next){
+    
+    const queue_id = req.query.queue_id;
+    const customer_id = parseInt(req.query.customer_id);
+    
+    if ((customer_id>= 1000000000 && customer_id<= 9999999999) || isNaN(customer_id)){
+        database.checkQueue(queue_id,customer_id)
+            .then(function(result){
+                res.status(200).send(result);
+            })
+            .catch(function(error){
+                next(error);
+            });
+    }
+    else {
+        next(errors.INVALID_QUERY_STRING);
+    }
+})
 
 /**
  * ========================== UTILS =========================

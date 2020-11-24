@@ -5,7 +5,7 @@ POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "customer_id": 1234567890,
+    "customer_id": 1000000001,
     "queue_id": "QUEUE12345"
 }
 
