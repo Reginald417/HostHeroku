@@ -34,6 +34,27 @@ const errors = {
 
 };
 
+function checkQueueIdExist(queue_id) {
+  const client = new Client(databaseConfig);
+  client.connect();
+
+  const sql = 'SELECT * FROM queue_table WHERE queue_id = lower($1)';
+
+  return client.query(sql,[queue_id])
+  .then(function(result){
+    if(result.rowCount==0){
+      client.end();
+      console.log('Queue ID non-existent')
+      throw errors.UNKNOWN_QUEUE;
+    }
+    client.end()
+    return result;
+  })
+  .catch(function(error){
+    client.end();
+    throw error;
+  })
+};
 
 function createQueue(queue_id,company_id) {
   const client = new Client(databaseConfig);
@@ -43,19 +64,19 @@ function createQueue(queue_id,company_id) {
     
     return client.query(sql,[queue_id,company_id])
       .then(function(result){
+        console.log('Queue created successfully');
         client.end();
-        console.log('Queue created successfully')
         return result;
         }
       )
       .catch(function(error){
-        client.end();
-        console.log(error)
         if(error.code == '23505') {
           console.log('Queue ID already exists')
+          client.end();
           throw errors.QUEUE_EXIST;
         }      
         else{
+          client.end();
           throw error
       }
     });
@@ -63,47 +84,39 @@ function createQueue(queue_id,company_id) {
 
 function updateQueue(queue_id,status) {
   const client = new Client(databaseConfig);
-    client.connect();
-    if(status=='ACTIVATE') {
-      var updatingStatus = 'active';
-    }
-    else {
-      var updatingStatus = 'inactive';
-    };
+  client.connect();
+  if(status=='ACTIVATE') {var updatingStatus = 'active';}
+  else {var updatingStatus = 'inactive';};
 
-    const sql = "UPDATE queue_table SET status=$1 WHERE queue_id=lower($2);" 
+  const sql = 'UPDATE queue_table SET status=$1 WHERE queue_id=lower($2);';
 
-    return client.query(sql,[updatingStatus,queue_id])
-      .then(function(result){
-        if(result.rowCount==1) {
-          console.log("Queue updated sucessfully");
-          client.end();
-          return(result);
-        }
-        else{
-          console.log('Queue ID non-existent');
-          client.end();
-          throw errors.UNKNOWN_QUEUE;
-        };
-      })
-      .catch(function(error){throw error});
+  return checkQueueIdExist(queue_id)
+    .then(function(result){
+      return client.query(sql,[updatingStatus,queue_id]);
+    })
+    .then(function(result){
+        console.log("Queue updated sucessfully");
+        client.end();
+        return(result);
+    })
+    .catch(function(error){
+      client.end();
+      throw error;
+    });
 };
 
 function arrivalRate(queue_id,from,duration) {
   const client = new Client(databaseConfig);
   client.connect(); 
 
-  const sqlCheck = 'SELECT queue_id FROM queue_table where queue_id = lower($1)';
   const sql = 'SELECT time, count(*) FROM record_table WHERE queue_id = lower($1) GROUP BY time ORDER BY time ASC';
-  
-  return client.query(sqlCheck,[queue_id])
+
+  return checkQueueIdExist(queue_id)
   .then(function(result) {
-    if(result.rowCount == 1) {
     const fromTime = Date.parse(from)/1000;
     const endTime = fromTime + duration*60;
     return client.query(sql,[queue_id])
     .then(function(result){
-      client.end();
       const resultRows = result.rows;
       const fittedRows = [];
       const finalResult = [];
@@ -124,15 +137,14 @@ function arrivalRate(queue_id,from,duration) {
         };
       };
       console.log('Arrival Rate Done')
-      return(finalResult);
-    })}
-    else{
-      console.log('Queue ID non-existent');
       client.end();
-      throw errors.UNKNOWN_QUEUE;
-    }
+      return(finalResult);
+    })
   })
-  .catch(function(error){throw error});
+  .catch(function(error){
+    client.end(); 
+    throw error
+  });
 };
 
 
@@ -140,15 +152,11 @@ function joinQueue(customer_id,queue_id) {
   const client = new Client(databaseConfig);
   client.connect();
 
-  const sqlCheck = 'SELECT * FROM queue_table WHERE queue_id = lower($1)';
   const sql = 'INSERT INTO customer_table VALUES ($1,lower($2))';
   const sqlRecord = 'INSERT INTO record_table (queue_id) VALUES (lower($1))';
 
-  return client.query(sqlCheck,[queue_id])
+  return checkQueueIdExist(queue_id)
   .then(function(result){
-    if(result.rowCount==0){
-      throw errors.UNKNOWN_QUEUE
-    }
     if(result.rows[0].status=='inactive'){
       throw errors.INACTIVE_QUEUE;
     }
@@ -163,13 +171,14 @@ function joinQueue(customer_id,queue_id) {
     return result;
   })
   .catch(function(error){
-    client.end();
     if(error.code == '23505') {
       console.log('Customer already in queue')
+      client.end();
       throw errors.ALREADY_IN_QUEUE;
     }      
     else{
-      throw error
+      client.end();
+      throw error;
   }
   });
 
@@ -179,18 +188,10 @@ function serverAvailable(queue_id){
   const client = new Client(databaseConfig);
   client.connect();
 
-  const sqlCheck ='SELECT * FROM queue_table where queue_id = lower($1)';
   const sqlSelect = 'SELECT * FROM customer_table where queue_id = lower($1) limit 1';
   const sqlDelete = 'DELETE FROM customer_table where customer_id = $1 AND queue_id = lower($2)';
 
-  return client.query(sqlCheck,[queue_id])
-  .then(function(result){
-    console.log(result)
-    if(result.rowCount==0){
-      throw errors.UNKNOWN_QUEUE;
-    };
-    return result;
-  })
+  return checkQueueIdExist(queue_id)
   .then(function(result){
     if(result.rows[0].status=='inactive'){
       throw errors.INACTIVE_QUEUE;
@@ -225,18 +226,11 @@ function checkQueue(queue_id,customer_id){
   const client = new Client(databaseConfig);
   client.connect();
 
-  const sqlCheck ='SELECT * FROM queue_table where queue_id = lower($1)';
   const sqlTotal = 'SELECT count(*) FROm customer_table WHERE queue_id = lower($1);';
   const sql = 'select * from customer_table where queue_id = lower($1);';
   const finalResult = {'total':0,'ahead':-1,'status':''}
 
-  return client.query(sqlCheck,[queue_id])
-  .then(function(result){
-    if(result.rowCount==0){
-      throw errors.UNKNOWN_QUEUE;
-    };
-    return result;
-  })
+  return checkQueueIdExist(queue_id)
   .then(function(result){
     finalResult.status = result.rows[0].status.toUpperCase();
   })
