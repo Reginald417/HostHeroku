@@ -1,6 +1,6 @@
 ### Arrival Rate 
 GET http://localhost:3000/company/arrival_rate
-        ?queue_id=QUEUE10001
+        ?queue_id=QUEUE12345
         &from=2020-11-18T09:45:00%2B08:00
         &duration=1 HTTP/1.1    
 
@@ -24,9 +24,8 @@ success response:
 ]
 -->
 
-
-
-### Non-Existence Queue ID
+//-----------------------------------------------------------//
+### Error - queue_id non-existent
 GET http://localhost:3000/company/arrival_rate
         ?queue_id=QUEUE10002
         &from=2020-11-18T09:45:00%2B08:00
@@ -38,7 +37,7 @@ Test Scenario: Non-Existent Queue ID
 
 Expected Outcome:
 console: 'Queue ID non-existent'
-success response: 
+error response: 
 {
     "message": "Queue ID provided is non existent",
     "status": 404,
@@ -46,23 +45,62 @@ success response:
 }
 -->
 
-
-
-### Invalid Query Parameters
+//-----------------------------------------------------------//
+### Error - From not following format
 GET http://localhost:3000/company/arrival_rate
-        ?queue_id=QUEUE1000
-        &from=2020-11-18T09:45:00%2B08:00
+        ?queue_id=QUEUE12345
+        &from=20201118T09:45:00%2B08:00
         &duration=1 HTTP/1.1    
 ###
 <!-- 
-Test Scenario: Non-Existent Queue ID
+Test Scenario: From not following formart
 
 Expected Outcome:
-console: 'Invalid JSON Body or Query'
-success response: 
+console: 'Invalid Query String'
+error response: 
 {
-    "message": "Input is invalid",
-    "status": 400,
-    "code": "INVALID_JSON_BODY"
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+### Error - duration negative
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=-1 HTTP/1.1    
+###
+<!-- 
+Test Scenario: Duration negative
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+### Error - Duration NaN
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=A HTTP/1.1    
+###
+<!-- 
+Test Scenario: From not following formart
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
 }
 -->

@@ -1,169 +1,188 @@
 @host = localhost:3000
-@path = /company/queue
+@path = /customer/queue
 
 ### Success
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
+    "customer_id": 1234567890,
     "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Creating Queue
+<!--
+Test Scenario: Join Queue
 
 Expected Outcome:
-console: 'Queue created successfully'
+console: 'Joined Queue'
 success response: status: 201 
 -->
 
 //-----------------------------------------------------------//
-### Success - company_id minimum
+
+### Success - multiple people joining the queue
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1000000000,
-    "queue_id": "QUEUE12346"
+    "customer_id": 1000000001,
+    "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Creating Queue
+<!--
+Test Scenario: Multiple people joining queue
 
 Expected Outcome:
-console: 'Queue created successfully'
+console: 'Joined Queue'
 success response: status: 201 
 -->
 
 //-----------------------------------------------------------//
-### Success - company_id maximum
+
+### Success - customer_id minimum
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 9999999999,
-    "queue_id": "QUEUE12347"
+    "customer_id": 1000000000,
+    "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Creating Queue
+<!--
+Test Scenario: Join Queue Customer ID minimum
 
 Expected Outcome:
-console: 'Queue created successfully'
+console: 'Joined Queue'
 success response: status: 201 
 -->
 
 //-----------------------------------------------------------//
-### Success - queue_id numberic only
+
+### Success - customer_id maximum
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
+    "customer_id": 9999999999,
+    "queue_id": "QUEUE12345"
+}
+
+###
+<!--
+Test Scenario: Join Queue Customer ID Maximum
+
+Expected Outcome:
+console: 'Joined Queue'
+success response: status: 201 
+-->
+
+//-----------------------------------------------------------//
+
+### Success - queue_id numeric only
+POST http://{{host}}{{path}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "customer_id": 9999999999,
     "queue_id": "1234567890"
 }
 
-
 ###
-<!-- 
-Test Scenario: Creating Queue
+<!--
+Test Scenario: Join Queue Queue ID numberic only
 
 Expected Outcome:
-console: 'Queue created successfully'
+console: 'Joined Queue'
 success response: status: 201 
 -->
 
 //-----------------------------------------------------------//
+
 ### Success - queue_id alphabets only
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
-    "queue_id": "abcdefghij"
+    "customer_id": 9999999999,
+    "queue_id": "QUEUEABCDE"
 }
 
-
 ###
-<!-- 
-Test Scenario: Creating Queue
+<!--
+Test Scenario: Join Queue Queue ID alphabets only
 
 Expected Outcome:
-console: 'Queue created successfully'
+console: 'Joined Queue'
 success response: status: 201 
 -->
 
 //-----------------------------------------------------------//
-### Queue Id already exist
+
+### Error - Queue Id non-existent
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
-    "queue_id": "QUEUE12345"
+    "customer_id": 9999999999,
+    "queue_id": "ABCDEABCDE"
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id already exist
+<!--
+Test Scenario: Error Queue ID non-existent
 
 Expected Outcome:
-console: 'Queue ID already exists'
+console: 'Queue ID non-existent'
 error response: 
 {
-  "message": "Queue ID already exists",
-  "status": 422,
-  "code": "QUEUE_EXISTS"
+  "message": "Queue ID provided is non existent",
+  "status": 404,
+  "code": "UNKNOWN_QUEUE"
 } 
 -->
 
 //-----------------------------------------------------------//
-### Queue Id already exist - Not case sensitive
+
+### Error - Queue Id not activated
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
-    "queue_id": "quEuE12345"
+    "customer_id": 9999999999,
+    "queue_id": "QUEUE12346"
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id already exist
+<!--
+Test Scenario: Error Queue not activated
 
 Expected Outcome:
-console: 'Queue ID already exists'
+console: 'Queue is not active'
 error response: 
 {
-  "message": "Queue ID already exists",
+  "message": "Queue is inactive",
   "status": 422,
-  "code": "QUEUE_EXISTS"
-} 
+  "code": "INACTIVE_QUEUE"
+}
 -->
 
 //-----------------------------------------------------------//
-### Error in parameter, company_id, less than 10 digits
+
+### Error in parameter, customer_id, less than 10 digits
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 123456789,
+    "customer_id": 123456789,
     "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Company Id less than 10 digits
+<!--
+Test Scenario: Customer ID less than 10 digits
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -176,19 +195,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
-### Error in parameter, company_id, more than 10 digits
+
+### Error in parameter, customer_id, more than 10 digits
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 12345678901,
+    "customer_id": 12345678901,
     "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Company Id more than 10 digits
+<!--
+Test Scenario: Customer ID more than 10 digits
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -201,19 +220,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
-### Error in parameter, company_id, not numeric
+
+### Error in parameter, customer_id, not numeric
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": "abcdefghij",
+    "customer_id": "abcdefghij",
     "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Company Id not numeric
+<!--
+Test Scenario: Customer ID not numeric
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -226,19 +245,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
-### Error in parameter, company_id, illegal character
+
+### Error in parameter, customer_id, illegal Characters
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": "123456789@",
+    "customer_id": "123456789@",
     "queue_id": "QUEUE12345"
 }
 
-
 ###
-<!-- 
-Test Scenario: Company Id illegal character
+<!--
+Test Scenario: Customer ID illegal characters
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -251,19 +270,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
+
 ### Error in parameter, queue_id, less than 10 alphanumeric
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
+    "customer_id": 1234567890,
     "queue_id": "QUEUE1234"
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id less than 10 alphanumeric
+<!--
+Test Scenario: Queue ID less than 10 digits
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -276,19 +295,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
+
 ### Error in parameter, queue_id, more than 10 alphanumeric
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 1234567890,
+    "customer_id": 1234567890,
     "queue_id": "QUEUE123456"
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id more than 10 alphanumeric
+<!--
+Test Scenario: Queue ID more than 10 alphanumeric
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -301,19 +320,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
+
 ### Error in parameter, queue_id, illegal characters
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 123456789,
+    "customer_id": 1234567890,
     "queue_id": "QUEUE1234@"
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id illegal characters
+<!--
+Test Scenario: Queue ID illegal characters
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -326,19 +345,19 @@ error response:
 -->
 
 //-----------------------------------------------------------//
-### Error in parameter, queue_id, not string
+
+### Error in parameter, queue_id, not a string
 POST http://{{host}}{{path}} HTTP/1.1
 Content-Type: application/json
 
 {
-    "company_id": 123456789,
+    "customer_id": 1234567890,
     "queue_id": 1234567890
 }
 
-
 ###
-<!-- 
-Test Scenario: Queue Id not string
+<!--
+Test Scenario: Queue ID not a string
 
 Expected Outcome:
 console: 'Invalid JSON Body'
@@ -349,3 +368,5 @@ error response:
   "code": "INVALID_JSON_BODY"
 }
 -->
+
+//-----------------------------------------------------------//

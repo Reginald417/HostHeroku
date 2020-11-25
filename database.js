@@ -113,34 +113,35 @@ function arrivalRate(queue_id,from,duration) {
 
   return checkQueueIdExist(queue_id)
   .then(function(result) {
+    return client.query(sql,[queue_id]);
+  })
+  .then(function(result){
     const fromTime = Date.parse(from)/1000;
     const endTime = fromTime + duration*60;
-    return client.query(sql,[queue_id])
-    .then(function(result){
-      const resultRows = result.rows;
-      const fittedRows = [];
-      const finalResult = [];
-      for (i=0;i<resultRows.length;i++){
-        resultRows[i].time = Date.parse(resultRows[i].time)/1000
+    const resultRows = result.rows;
+    const fittedRows = [];
+    const finalResult = [];
+    for (i=0;i<resultRows.length;i++){
+      resultRows[i].time = Date.parse(resultRows[i].time)/1000
+    };
+    for (i=0;i<resultRows.length;i++){
+      if (resultRows[i].time>=fromTime && resultRows[i].time<=endTime){
+        fittedRows.push(resultRows[i]);
       };
-      for (i=0;i<resultRows.length;i++){
-        if (resultRows[i].time>=fromTime && resultRows[i].time<=endTime){
-          fittedRows.push(resultRows[i]);
+    };
+    for (i=0;i<duration*60;i++) {
+      finalResult.push({'timestamp':fromTime+i,'count': '0'})
+      for(x=0;x<fittedRows.length;x++) {
+        if (finalResult[i].timestamp==fittedRows[x].time) {
+          finalResult[i].count = fittedRows[x].count;
         };
       };
-      for (i=0;i<duration*60;i++) {
-        finalResult.push({'timestamp':fromTime+i,'count': '0'})
-        for(x=0;x<fittedRows.length;x++) {
-          if (finalResult[i].timestamp==fittedRows[x].time) {
-            finalResult[i].count = fittedRows[x].count;
-          };
-        };
-      };
-      console.log('Arrival Rate Done')
-      client.end();
-      return(finalResult);
+    };
+    console.log('Arrival Rate Done')
+    client.end();
+    return(finalResult);
     })
-  })
+
   .catch(function(error){
     client.end(); 
     throw error
@@ -158,6 +159,7 @@ function joinQueue(customer_id,queue_id) {
   return checkQueueIdExist(queue_id)
   .then(function(result){
     if(result.rows[0].status=='inactive'){
+      console.log('Queue is not active')
       throw errors.INACTIVE_QUEUE;
     }
     return client.query(sql,[customer_id,queue_id]);
@@ -211,6 +213,7 @@ function serverAvailable(queue_id){
       return client.query(sqlDelete,[customer.customer_id,customer.queue_id])
       .then(function(result){
         client.end();
+        console.log({'customer_id':parseInt(customer.customer_id)})
         return {'customer_id':parseInt(customer.customer_id)};
       })
     }
@@ -244,18 +247,21 @@ function checkQueue(queue_id,customer_id){
   .then(function(result){
     if(isNaN(customer_id)){
       client.end()
+      console.log('Successful Check Queue');
       return(finalResult)
     }
     else{
       for(i=0;i<result.rows.length;i++){
         if(result.rows[i].customer_id == customer_id){
           finalResult.ahead = i;
-          client.end()
+          client.end();
+          console.log('Successful Check Queue');
           return(finalResult);
         };
       };
-      client.end()
-        return(finalResult)
+      client.end();
+      console.log('Successful Check Queue');
+      return(finalResult);
     };
   })
   .catch(function(error){

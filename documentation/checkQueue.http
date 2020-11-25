@@ -1,0 +1,268 @@
+@host = localhost:3000
+@path = /customer/queue
+
+### Success without customer_id
+GET http://{{host}}{{path}}?queue_id=QUEUE12345 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue without Customer ID
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 5,
+  "ahead": -1,
+  "status": "ACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success with customer_id
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=1234567892 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue with Customer ID
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 5,
+  "ahead": 2,
+  "status": "ACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success - queue_id not case sensitive
+GET http://{{host}}{{path}}?queue_id=quEuE12345&customer_id=1234567892 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue Queue ID not case sensitive
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 5,
+  "ahead": 2,
+  "status": "ACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success - customer_id minimum
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=1000000000 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue with Customer ID Minimum
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 5,
+  "ahead": -1,
+  "status": "ACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success - customer_id maximum
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=9999999999 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue with Customer ID Maximum
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 5,
+  "ahead": -1,
+  "status": "ACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success - queue_id all numbers
+GET http://{{host}}{{path}}?queue_id=1234567890&customer_id=1000000000 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue with QUEUE ID all numbers
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 0,
+  "ahead": -1,
+  "status": "INACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Success - queue_id all alphabet
+GET http://{{host}}{{path}}?queue_id=abcdefghij&customer_id=1000000000 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue with QUEUE ID all alphabet
+
+Expected Outcome:
+console: 'Successful Check Queue'
+success response: status: 200
+{
+  "total": 0,
+  "ahead": -1,
+  "status": "INACTIVE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - queue_id not found
+GET http://{{host}}{{path}}?queue_id=0987654321&customer_id=1000000000 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue ID not found
+
+Expected Outcome:
+console: 'Queue ID non-existent'
+error response: 
+{
+  "message": "Queue ID provided is non existent",
+  "status": 404,
+  "code": "UNKNOWN_QUEUE"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - customer_id too small
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=123456789 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue Customer ID too small
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - customer_id too big
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=12345678901 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue Customer ID too bigs
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - customer_id contain alphabet
+GET http://{{host}}{{path}}?queue_id=QUEUE12345&customer_id=ABCDEABCDE HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue Customer ID contain alphabet
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - queue_id too short
+GET http://{{host}}{{path}}?queue_id=QUEUE1234&customer_id=1234567890 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue ID too short
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - queue_id too long
+GET http://{{host}}{{path}}?queue_id=QUEUE123456&customer_id=1234567890 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue ID too long
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+
+### Error - queue_id invalid character
+GET http://{{host}}{{path}}?queue_id=QUEUE1234@&customer_id=1234567890 HTTP/1.1
+
+###
+<!-- 
+Test Scenario: Checking Queue ID invalid character
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//

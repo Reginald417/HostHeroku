@@ -142,7 +142,8 @@ app.get('/company/arrival_rate',validator.validate({query: schema_arrivalRate}),
         });
     }
     else {
-        next(errors.INVALID_QUERY_STRING)
+        console.log('Invalid Query String');
+        next(errors.INVALID_QUERY_STRING);
     }
 });
 
@@ -177,7 +178,7 @@ app.get('/customer/queue',validator.validate({query: schema_checkQueue}),functio
     const queue_id = req.query.queue_id;
     const customer_id = parseInt(req.query.customer_id);
     
-    if ((customer_id>= 1000000000 && customer_id<= 9999999999) || isNaN(customer_id)){
+    if ((customer_id>= 1000000000 && customer_id<= 9999999999) && isNaN(customer_id)){
         database.checkQueue(queue_id,customer_id)
             .then(function(result){
                 res.status(200).send(result);
@@ -187,6 +188,7 @@ app.get('/customer/queue',validator.validate({query: schema_checkQueue}),functio
             });
     }
     else {
+        console.log('Invalid Query String');
         next(errors.INVALID_QUERY_STRING);
     }
 })
@@ -213,7 +215,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
     if (err instanceof ValidationError) {
         if (err.validationErrors.body != undefined){
-            console.log('Invalid JSON Body')
+            console.log('Invalid JSON Body');
             res.status(errors.INVALID_JSON_BODY.status).send(errors.INVALID_JSON_BODY);
         }
         else {
