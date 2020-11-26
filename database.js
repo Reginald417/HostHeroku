@@ -188,8 +188,8 @@ function serverAvailable(queue_id){
   const client = new Client(databaseConfig);
   client.connect();
 
-  const sqlSelect = 'SELECT * FROM customer_table where queue_id = lower($1) limit 1;';
-  const sqlDelete = 'DELETE FROM customer_table where customer_id = $1 AND queue_id = lower($2);';
+  const sqlSelect = 'SELECT * FROM customer_table WHERE queue_id = lower($1) limit 1;';
+  const sqlDelete = 'DELETE FROM customer_table WHERE customer_id = $1 AND queue_id = lower($2);';
 
   return checkQueueIdExist(queue_id)
   .then(function(result){
@@ -227,8 +227,8 @@ function checkQueue(queue_id,customer_id){
   const client = new Client(databaseConfig);
   client.connect();
 
-  const sqlTotal = 'SELECT count(*) FROm customer_table WHERE queue_id = lower($1);';
-  const sql = 'select * from customer_table where queue_id = lower($1);';
+  const sqlTotal = 'SELECT count(*) FROM customer_table WHERE queue_id = lower($1);';
+  const sql = 'select * FROM customer_table WHERE queue_id = lower($1);';
   const finalResult = {'total':0,'ahead':-1,'status':''};
 
   return checkQueueIdExist(queue_id)
