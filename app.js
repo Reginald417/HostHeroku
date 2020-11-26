@@ -178,7 +178,7 @@ app.get('/customer/queue',validator.validate({query: schema_checkQueue}),functio
     const queue_id = req.query.queue_id;
     const customer_id = parseInt(req.query.customer_id);
     
-    if ((customer_id>= 1000000000 && customer_id<= 9999999999) && isNaN(customer_id)){
+    if ((customer_id>= 1000000000 && customer_id<= 9999999999) || isNaN(customer_id)){
         database.checkQueue(queue_id,customer_id)
             .then(function(result){
                 res.status(200).send(result);
