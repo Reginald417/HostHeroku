@@ -98,12 +98,12 @@ app.put('/company/queue',validator.validate({body: schema_updateQueue,query: sch
     const status = req.body.status;
 
     database.updateQueue(queue_id, status)
-    .then(function(){
-        res.status(200).send();
-    })   
-    .catch(function(error){
-        next(error);
-    });
+        .then(function(){
+            res.status(200).send();
+        })   
+        .catch(function(error){
+            next(error);
+        });
 });
 
 /**
@@ -115,12 +115,12 @@ app.put('/company/server',validator.validate({body: schema_serverAvailable}),fun
     const queue_id = req.body.queue_id;   
 
     database.serverAvailable(queue_id)
-    .then(function(result){
-        res.status(200).send(result);
-    })   
-    .catch(function(error){
-        next(error);
-    });
+        .then(function(result){
+            res.status(200).send(result);
+        })   
+        .catch(function(error){
+            next(error);
+        });
 });
 
 /**
@@ -132,6 +132,7 @@ app.get('/company/arrival_rate',validator.validate({query: schema_arrivalRate}),
     const queue_id = req.query.queue_id;
     const from = req.query.from;
     const duration = req.query.duration;   
+
     if(parseInt(duration)>=1 && parseInt(duration)<=1440){
         database.arrivalRate(queue_id, from, duration)
         .then(function(result){
@@ -144,7 +145,7 @@ app.get('/company/arrival_rate',validator.validate({query: schema_arrivalRate}),
     else {
         console.log('Invalid Query String');
         next(errors.INVALID_QUERY_STRING);
-    }
+    };
 });
 
 /**
@@ -190,8 +191,8 @@ app.get('/customer/queue',validator.validate({query: schema_checkQueue}),functio
     else {
         console.log('Invalid Query String');
         next(errors.INVALID_QUERY_STRING);
-    }
-})
+    };
+});
 
 /**
  * ========================== UTILS =========================
@@ -219,7 +220,7 @@ app.use(function (err, req, res, next) {
             res.status(errors.INVALID_JSON_BODY.status).send(errors.INVALID_JSON_BODY);
         }
         else {
-            console.log('Invalid Query String')
+            console.log('Invalid Query String');
             res.status(errors.INVALID_QUERY_STRING.status).send(errors.INVALID_QUERY_STRING);
         }
     }
@@ -229,7 +230,7 @@ app.use(function (err, req, res, next) {
             error: 'Unexpected Error!',
         };
         res.status(status).send(error);
-    }
+    };
 });
 
 function tearDown() {

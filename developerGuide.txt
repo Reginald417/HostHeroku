@@ -1,0 +1,48 @@
+Step 1:
+Clone the git repository 
+    Press Ctrl + P in visual studio code
+    Enter '>Git:Clone'
+    Enter the git repository url (https://github.com/ADES-FSP/virtual-queue-backend-2b03-adesgroup1)
+    Select a location to save the file in your desktop
+
+Step 2:
+Install Node.js
+    Go to https://nodejs.org/en/download/
+    Downoad the latest default version for your OS
+    Open the installer
+    System will ask if you want to run the software - click Run 
+    In the Node.js setup wizard - click Next 
+    In the license agreement - click Next 
+    The installer will prompt you for the installation location - click Next 
+    The wizard will let you select components to include or remove - click Next 
+    Finally, click the Install button and when it finishes click finish
+
+Step 3:
+Install the packages
+    First open a new terminal in Viusal Studio code
+    Enter 'npm install'
+    Enter 'npm install express'
+    Enter 'npm install pg'
+    Enter 'npm install express-json-validator-middleware'
+
+Step 4:
+Starting the server
+    Connect to the internet 
+    Connect to a VPN
+    Open the clone repository in Visual Studio Code
+    Open a terminal in Visual Studio Code
+    Enter 'node server.js' in the terminal
+    Server is now running
+
+Step 5:
+Using the APIs
+    Install REST Client extention in Visual Studio Code
+    Open the documentation folder in Visual Studio Code
+    Open the API file you wish to use
+    Edit the JSON Body or Query to the input you want
+    Click send response
+    A response window will appear with the success response or error response
+    A console.log will also appear 
+
+    TADA IT'S WORKING! :D
+    
