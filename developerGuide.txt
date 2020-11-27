@@ -38,11 +38,10 @@ Step 5:
 Using the APIs
     Install REST Client extention in Visual Studio Code
     Open the documentation folder in Visual Studio Code
-    Open the API file you wish to use
+    Open the .http file you wish to use
     Edit the JSON Body or Query to the input you want
     Click send response
     A response window will appear with the success response or error response
     A console.log will also appear 
 
     TADA IT'S WORKING! :D
-    
