@@ -1,0 +1,106 @@
+### Arrival Rate 
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+
+###
+<!-- 
+Test Scenario: Getting Arrival Rate
+
+Expected Outcome:
+console: 'Arrival Rate Done'
+success response: 
+[
+  {
+    "timestamp": 1605663900,
+    "count": "0"
+  }, 
+  .....
+  {
+    "timestamp": 1605663959,
+    "count": "0"
+  }
+]
+-->
+
+//-----------------------------------------------------------//
+### Error - queue_id non-existent
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE10002
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+
+###
+<!-- 
+Test Scenario: Non-Existent Queue ID
+
+Expected Outcome:
+console: 'Queue ID non-existent'
+error response: 
+{
+    "message": "Queue ID provided is non existent",
+    "status": 404,
+    "code": "UNKNOWN_QUEUE"
+}
+-->
+
+//-----------------------------------------------------------//
+### Error - From not following format
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=20201118T09:45:00%2B08:00
+        &duration=1 HTTP/1.1    
+###
+<!-- 
+Test Scenario: From not following formart
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+### Error - duration negative
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=-1 HTTP/1.1    
+###
+<!-- 
+Test Scenario: Duration negative
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->
+
+//-----------------------------------------------------------//
+### Error - Duration NaN
+GET http://localhost:3000/company/arrival_rate
+        ?queue_id=QUEUE12345
+        &from=2020-11-18T09:45:00%2B08:00
+        &duration=A HTTP/1.1    
+###
+<!-- 
+Test Scenario: From not following formart
+
+Expected Outcome:
+console: 'Invalid Query String'
+error response: 
+{
+  "message": "Query is invalid",
+  "status": 400,
+  "code": "INVALID_QUERY_STRING"
+}
+-->

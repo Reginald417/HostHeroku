@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "required": [
+        "queue_id"
+    ],
+    "properties": {
+      "queue_id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9]{10}$"
+      }
+    }
+  }

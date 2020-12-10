@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "required": [
+        "company_id",
+        "queue_id"
+    ],
+    "properties": {
+      "company_id": {
+        "type": "integer",
+        "minimum": 1000000000,
+        "maximum": 9999999999
+      },
+      "queue_id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9]{10}$"
+      }
+    }
+  }
