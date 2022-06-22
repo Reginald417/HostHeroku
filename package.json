@@ -10,7 +10,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "async": "^3.2.0",
+        "async": "^3.2.2",
         "cors": "^2.8.5",
         "express": "^4.17.1",
         "express-json-validator-middleware": "^2.1.1",
@@ -19,7 +19,7 @@
         "pg": "^8.5.0"
     },
     "devDependencies": {
-        "async": "^3.2.0",
+        "async": "^3.2.2",
         "chalk": "^4.1.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.5.2",
